@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    >
+    <ImageView
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:layout_centerInParent="true"
+        android:paddingRight="10dp"
+        android:src="@drawable/main_icon"/>
+    <TextView  
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content" 
+        android:textSize="20sp"
+        android:text="@string/label_setup"
+        />
+</LinearLayout>
+<TextView
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="10dp"
+    android:textSize="18sp"
+    android:id="@+id/textview_enable"
+    android:text="@string/text_enable"
+    />
+<Button
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/button_enable"
+    android:text="@string/label_enable"
+    android:onClick="showInputMethodSettings"
+    />
+<TextView
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:id="@+id/textview_arrow"
+    android:textSize="18sp"
+    android:text="↓" 
+    />
+<!--
+    -->
+<TextView
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="10dp"
+    android:textSize="18sp"
+    android:id="@+id/textview_select"
+    android:text="@string/text_select"
+    />
+<Button
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/button_select"
+    android:text="@string/label_select"
+    android:onClick="showInputMethodPicker"
+    />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="fill_parent"
+    android:layout_gravity="center"
+    android:paddingTop="10dp"
+    >
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:paddingRight="10dp"
+        android:gravity="center"
+        android:textSize="28sp"
+        android:id="@+id/textview_success_tick"
+        android:text="✓"
+        android:textColor="#ff77ff77"
+        android:visibility="gone"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:textSize="28sp"
+        android:id="@+id/textview_success"
+        android:text="@string/text_success"
+        android:visibility="gone"
+        />
+</LinearLayout>
+</LinearLayout>
+

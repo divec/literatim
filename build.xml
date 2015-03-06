@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="literatim" default="help">
+    <loadproperties srcFile="local.properties" />
+    <property file="ant.properties" />
+    <loadproperties srcFile="project.properties" />
+    <fail message="No sdk.dir. Try 'android update project' to generate local.properties" unless="sdk.dir" />
+    <import file="${sdk.dir}/tools/ant/build.xml" />
+</project>
