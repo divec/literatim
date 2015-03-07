@@ -28,3 +28,6 @@ proguard-project.txt
 
 # Private keys
 *.keystore
+
+# mac files
+.DS_Store
