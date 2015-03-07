@@ -74,7 +74,7 @@
         <Key android:codes="44" android:keyLabel=","
                 android:keyWidth="10%p"/>
         <Key android:codes="32" android:keyIcon="@drawable/sym_keyboard_space" 
-                android:keyWidth="30%p" android:isRepeatable="true"/>
+                android:keyWidth="30%p" android:isRepeatable="false"/>
         <Key android:codes="46" android:keyLabel="."
                 android:keyWidth="10%p"/>
         <Key android:codes="39" android:keyLabel="'"
