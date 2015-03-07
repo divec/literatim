@@ -711,7 +711,7 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
                     return;
                 }
                 showProgress(null);
-                if (! isInputViewShown() && !isShowInputRequested()) {
+                if (!isInputViewShown() && !isShowInputRequested()) {
                     // Abort if the input view is closed by this time
                     return;
                 }
@@ -823,7 +823,13 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
 
     public void loadEntriesDialog(int selectedIndex) {
         String context = lexicon.getContextFast(getCurrentInputConnection());
-        getEntriesAsync(mComposing.toString(), context, MAX_SUGGESTIONS);
+        String s;
+        if (selectedIndex < suggestions.size()) {
+            s = suggestions.get(selectedIndex).getText();
+        } else {
+            s = mComposing.toString();
+        }
+        getEntriesAsync(s, context, MAX_SUGGESTIONS);
     }
 
     public void showEntryDetailsDialog(final Entry entry) {
