@@ -13,7 +13,10 @@ Or build locally and install (see below)
 
 ## Developing
 
+First install Android SDK 7, then:
+
 ```shell
+$ android update project -p . # generate local.properties & build.properties
 $ ant debug
 $ ant debug install
 $ ant release
