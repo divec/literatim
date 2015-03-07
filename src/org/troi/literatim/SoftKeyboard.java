@@ -967,10 +967,16 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
 
     public void swipeUp() {
     }
-    
+
     public void onPress(int primaryCode) {
+        // hide preview on symbols, del, options and space keys
+        if (primaryCode==-2 || primaryCode==-5 || primaryCode == -100 || primaryCode == 32){
+            mInputView.setPreviewEnabled(false);
+        } else {
+            mInputView.setPreviewEnabled(true);
+        }
     }
-    
+
     public void onRelease(int primaryCode) {
     }
 
