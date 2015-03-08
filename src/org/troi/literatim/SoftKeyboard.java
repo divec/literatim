@@ -26,6 +26,7 @@ import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
+import android.os.SystemClock;
 import android.text.method.MetaKeyKeyListener;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -73,6 +74,11 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
      */
     static final boolean PROCESS_HARD_KEYS = true;
     
+    // How many continuous deletes at which to start deleting at a higher speed.
+    private static final int DELETE_ACCELERATE_AT = 20;
+    // Key events coming any faster than this are long-presses.
+    private static final int QUICK_PRESS = 200;
+    
     private KeyboardView mInputView;
     private CandidateView mCandidateView;
     private CompletionInfo[] mCompletions;
@@ -84,6 +90,9 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
     private boolean mCapsLock;
     private long mLastShiftTime;
     private long mMetaState;
+    
+    private int mDeleteCount;
+    private long mLastKeyTime;
     
     private LatinKeyboard mSymbolsKeyboard;
     private LatinKeyboard mSymbolsShiftedKeyboard;
@@ -275,6 +284,7 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
         // Apply the selected keyboard to the input view.
         mInputView.setKeyboard(mCurKeyboard);
         mInputView.closing();
+        mDeleteCount = 0;
     }
     
     /**
@@ -512,6 +522,11 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
     // Implementation of KeyboardViewListener
 
     public void onKey(int primaryCode, int[] keyCodes) {
+        long when = SystemClock.uptimeMillis();
+        if (primaryCode != Keyboard.KEYCODE_DELETE || when > mLastKeyTime + QUICK_PRESS) {
+            mDeleteCount = 0;
+        }
+        mLastKeyTime = when;
         if (isWordSeparator(primaryCode)) {
             // Handle separator
             if (mComposing.length() > 0) {
@@ -521,6 +536,7 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
             updateShiftKeyState(getCurrentInputEditorInfo());
         } else if (primaryCode == Keyboard.KEYCODE_DELETE) {
             handleBackspace();
+            mDeleteCount++;
         } else if (primaryCode == Keyboard.KEYCODE_SHIFT) {
             handleShift();
         } else if (primaryCode == Keyboard.KEYCODE_CANCEL) {
@@ -617,6 +633,9 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
             updateCandidates();
         } else {
             keyDownUp(KeyEvent.KEYCODE_DEL);
+            if (mDeleteCount > DELETE_ACCELERATE_AT) {
+                keyDownUp(KeyEvent.KEYCODE_DEL);
+            }
         }
         updateShiftKeyState(getCurrentInputEditorInfo());
     }
