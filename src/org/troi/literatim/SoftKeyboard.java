@@ -798,6 +798,9 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
     }
 
     private String touchingLeftWord() {
+        if (!isCursorTouchingLeftWord()) {
+            return null;
+        }
         InputConnection ic = getCurrentInputConnection();
         if (ic == null) return null;
         CharSequence toLeft = ic.getTextBeforeCursor(15, 0);
