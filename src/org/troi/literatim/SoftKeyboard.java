@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -78,6 +79,7 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
     private static final int DELETE_ACCELERATE_AT = 20;
     // Key events coming any faster than this are long-presses.
     private static final int QUICK_PRESS = 200;
+    static final int KEYCODE_SPACE = ' ';
     
     private KeyboardView mInputView;
     private CandidateView mCandidateView;
@@ -101,7 +103,9 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
     private LatinKeyboard mCurKeyboard;
     
     private String mWordSeparators;
+    private String mSentenceSeparators;
     private LexiconManager lexiconManager;
+    private boolean mJustEnteredAutoSpace;
     private Lexicon lexicon = null;
     private List<Suggestion> suggestions;
     private List<Entry> entries;
@@ -116,7 +120,9 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
      */
     @Override public void onCreate() {
         super.onCreate();
-        mWordSeparators = getResources().getString(R.string.word_separators);
+        Resources r = getResources();
+        mWordSeparators = r.getString(R.string.word_separators);
+        mSentenceSeparators = r.getString(R.string.sentence_separators);
         lexiconManager = new LexiconManager(this);
         lexicon = lexiconManager.getCurrentLexicon();
     }
@@ -285,6 +291,7 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
         mInputView.setKeyboard(mCurKeyboard);
         mInputView.closing();
         mDeleteCount = 0;
+        mJustEnteredAutoSpace = false;
     }
     
     /**
@@ -518,6 +525,25 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
                 break;
         }
     }
+    
+    private boolean isSentenceSeparator(int code) {
+        return mSentenceSeparators.contains(String.valueOf((char)code));
+    }
+
+    private void swapPunctuationAndSpace() {
+        final InputConnection ic = getCurrentInputConnection();
+        if (ic == null) return;
+        CharSequence lastTwo = ic.getTextBeforeCursor(2, 0);
+        if (lastTwo != null && lastTwo.length() == 2
+                && lastTwo.charAt(0) == KEYCODE_SPACE && isSentenceSeparator(lastTwo.charAt(1))) {
+            ic.beginBatchEdit();
+            ic.deleteSurroundingText(2, 0);
+            ic.commitText(lastTwo.charAt(1) + " ", 1);
+            ic.endBatchEdit();
+            updateShiftKeyState(getCurrentInputEditorInfo());
+            mJustEnteredAutoSpace = true;
+        }
+    }
 
     // Implementation of KeyboardViewListener
 
@@ -527,12 +553,16 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
             mDeleteCount = 0;
         }
         mLastKeyTime = when;
+        InputConnection ic = getCurrentInputConnection();
         if (isWordSeparator(primaryCode)) {
             // Handle separator
             if (mComposing.length() > 0) {
-                commitTyped(getCurrentInputConnection());
+                commitTyped(ic);
             }
             sendKey(primaryCode);
+            if (mJustEnteredAutoSpace) {
+                swapPunctuationAndSpace();
+            }
             updateShiftKeyState(getCurrentInputEditorInfo());
         } else if (primaryCode == Keyboard.KEYCODE_DELETE) {
             handleBackspace();
@@ -558,6 +588,7 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
                 current.setShifted(false);
             }
         } else {
+            mJustEnteredAutoSpace = false;
             handleCharacter(primaryCode, keyCodes);
         }
     }
@@ -794,6 +825,7 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
         // add trailing space for letters
         if (Character.isLetter(lastChar)) {
             mComposing.append(' ');
+            mJustEnteredAutoSpace = true;
         }
         commitTyped(inputConnection);
     }
