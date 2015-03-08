@@ -680,9 +680,10 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
                     ic.endBatchEdit();
                     updateCandidates();
                 }
-            } else if (mDeleteCount > DELETE_ACCELERATE_AT) {
-                keyDownUp(KeyEvent.KEYCODE_DEL);
             }
+        }
+        if (mDeleteCount > DELETE_ACCELERATE_AT) {
+            keyDownUp(KeyEvent.KEYCODE_DEL);
         }
         updateShiftKeyState(getCurrentInputEditorInfo());
     }
@@ -808,7 +809,7 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
             return null;
         }
         int start = toLeft.length();
-        while (start > 0 && !isWordSeparator(toLeft.charAt(start - 1))) start--;
+        while (start > 0 && !isWordSeparator(toLeft.charAt(start - 1)) && toLeft.charAt(start - 1) != '\'') start--;
         return toLeft.toString().substring(start, toLeft.length());
     }
 
@@ -828,23 +829,31 @@ public class SoftKeyboard extends InputMethodService implements KeyboardView.OnK
     }
 
     public void pickCandidateManually(int index) {
+        InputConnection ic = getCurrentInputConnection();
         if (mCompletionOn && mCompletions != null && index >= 0 && index < mCompletions.length) {
             CompletionInfo ci = mCompletions[index];
-            getCurrentInputConnection().commitCompletion(ci);
+            ic.commitCompletion(ci);
             if (mCandidateView != null) {
                 mCandidateView.clear();
             }
             updateShiftKeyState(getCurrentInputEditorInfo());
         } else if (suggestions != null && index < suggestions.size()) {
             String text = lexicon.getSuggestionText(mComposing.toString(), suggestions.get(index));
+            if (text.charAt(0) == '\'') {
+                // test to make sure we don't insert double ''
+                CharSequence lastChar = ic.getTextBeforeCursor(1, 0);
+                if (lastChar.charAt(0) == '\'') {
+                    text = text.substring(1);
+                }
+            }
             mComposing.setLength(0);
             mComposing.append(text);
-            commitWithSpacing(getCurrentInputConnection());
+            commitWithSpacing(ic);
 
         }
         else if (mComposing.length() > 0) {
             // Strange error; just commit the current text
-            commitWithSpacing(getCurrentInputConnection());
+            commitWithSpacing(ic);
         }
     }
 
