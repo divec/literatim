@@ -88,13 +88,13 @@ public class EnCyLexicon extends Lexicon {
         }
         
         String flatSearch = flatten(search);
-        String precalcSql = "SELECT distinct p.keystrokes as keystrokes, p.prediction as prediction, p.lang_code as lang_code from predictions p inner join precalc c on c.prediction_id = p.rowid where c.keystrokes=? order by p.keystrokes <> ?, p.lang_code = 2, p.rowid";
+        String precalcSql = "SELECT distinct p.keystrokes as keystrokes, p.prediction as prediction, p.lang_code as lang_code from predictions p inner join precalc c on c.prediction_id = p.id where c.keystrokes=? order by p.keystrokes <> ?, p.lang_code = 2, p.id";
         String[] precalcArgs = new String[] {flatSearch, flatSearch};
         List<Suggestion> precalcSuggestions = getSuggestionsFromSql(search, precalcSql, precalcArgs, maxSuggestions, asyncTask);
         if (precalcSuggestions != null && precalcSuggestions.size() > 0) return precalcSuggestions;
 
         String flatNext = getIncremented(flatSearch);
-        String sql = "SELECT distinct p.keystrokes as keystrokes, p.prediction as prediction, p.lang_code as lang_code from predictions p where p.keystrokes >= ? and p.keystrokes < ? order by p.keystrokes <> ?, p.lang_code = 2, p.rowid limit " + maxSuggestions;
+        String sql = "SELECT distinct p.keystrokes as keystrokes, p.prediction as prediction, p.lang_code as lang_code from predictions p where p.keystrokes >= ? and p.keystrokes < ? order by p.keystrokes <> ?, p.lang_code = 2, p.id limit " + maxSuggestions;
         String[] args = new String[]{flatSearch, flatNext, flatSearch};
         List<Suggestion> suggestions = getSuggestionsFromSql(search, sql, args, maxSuggestions, asyncTask); // possibly null; ok
         return suggestions;
@@ -107,13 +107,13 @@ public class EnCyLexicon extends Lexicon {
         if (db == null) return new ArrayList<Entry>();
 
         String flatSearch = flatten(search);
-        String precalcSql = "SELECT distinct e.info as info from entries e inner join predictions p on p.lemma_id = e.lemma_id inner join precalc c on p.rowid = c.prediction_id where c.keystrokes=? order by p.keystrokes <> ?, p.lang_code = 2, p.rowid";
+        String precalcSql = "SELECT distinct e.info as info from entries e inner join predictions p on p.lemma_id = e.lemma_id inner join precalc c on p.id = c.prediction_id where c.keystrokes=? order by p.keystrokes <> ?, p.lang_code = 2, p.id";
         String[] precalcArgs = new String[] {flatSearch, flatSearch};
         List<Entry> precalcEntries = getEntriesFromSql(precalcSql, precalcArgs, asyncTask);
         if (precalcEntries != null && precalcEntries.size() > 0) return precalcEntries;
 
         String flatNext = getIncremented(flatSearch);
-        String sql = "SELECT distinct e.info as info from entries e inner join predictions p on p.lemma_id = e.lemma_id where p.keystrokes >= ? and p.keystrokes < ? order by p.keystrokes <> ?, p.lang_code = 2, p.rowid limit " + maxEntries;
+        String sql = "SELECT distinct e.info as info from entries e inner join predictions p on p.lemma_id = e.lemma_id where p.keystrokes >= ? and p.keystrokes < ? order by p.keystrokes <> ?, p.lang_code = 2, p.id limit " + maxEntries;
         String[] args = new String[]{flatSearch, flatNext, flatSearch};
         List<Entry> entries = getEntriesFromSql(sql, args, asyncTask); // could be null; ok
         return entries;
